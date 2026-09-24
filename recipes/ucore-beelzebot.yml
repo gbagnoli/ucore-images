@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/gbagnoli/ucore-beelzebot
+name: ucore-beelzebot
+description: uCore for beelzebot (formerly boxy).
+
+# thin per-host layer on top of the shared fleet base
+base-image: ghcr.io/gbagnoli/ucore-common
+image-version: latest
+
+modules:
+  # No host-specific OS bits yet; per-host config lives in skillet.
+  - type: signing

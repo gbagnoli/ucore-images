@@ -1,0 +1,10 @@
+#!/bin/sh
+# wol - send a Wake-on-LAN magic packet.
+# Usage: wol <mac-address> [broadcast-ip]
+#
+# Per-target wrappers (e.g. wol_nas with a baked-in MAC) can live next to
+# this script once the target MAC addresses are known.
+set -eu
+mac="${1:?usage: wol <mac-address> [broadcast-ip]}"
+bcast="${2:-255.255.255.255}"
+exec wakeonlan -i "$bcast" "$mac"

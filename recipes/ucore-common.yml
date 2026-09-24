@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/gbagnoli/ucore-common
+name: ucore-common
+# description will be included in the image's metadata
+description: Shared uCore base for the home fleet (beelzebot, bender, clamps).
+
+# the base image to build on top of (FROM) and the version tag to use
+base-image: ghcr.io/ublue-os/ucore
+image-version: stable
+
+# module configuration, executed in order
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: / # copies files/system/* into the image's root folder /
+
+  - type: dnf
+    install:
+      packages:
+        - eternal-terminal # remote shell with session persistence (et)
+        - wakeonlan # Wake-on-LAN magic packet sender (used by wol helpers)
+        - btrfs-progs # needed by btrbk snapshots
+        - iputils # ping, used by monitoring checks
+
+  - type: systemd
+    system:
+      enabled:
+        - et.service
+        - podman-auto-update.timer
+
+  - type: signing # sets up the cosign policy & signing files for signed images

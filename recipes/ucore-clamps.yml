@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# image will be published to ghcr.io/gbagnoli/ucore-clamps
+name: ucore-clamps
+description: uCore for clamps, the home server (Beelink Mini S13).
+
+# thin per-host layer on top of the shared fleet base
+base-image: ghcr.io/gbagnoli/ucore-common
+image-version: latest
+
+modules:
+  # Pi-hole needs port 53; make sure nothing on this host fights it for the DNS port.
+  - type: systemd
+    system:
+      masked:
+        - systemd-resolved.service
+
+  - type: signing
