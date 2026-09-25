@@ -16,14 +16,16 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 
 ### What lives here (the OS layer)
 
-- **Packages** (`dnf` module in `ucore-common`): `eternal-terminal`, `wakeonlan`,
-  `btrfs-progs`, `iputils`.
+- **Packages**: none added — `btrfs-progs` and `iputils` already ship in the
+  uCore base image. (`wakeonlan` was renamed to `wol` in Fedora and is covered
+  by the `wol` helper below; `eternal-terminal` is not in the Fedora repos —
+  see open decisions.)
 - **Static files** (`files/system/` → `/`): sysctl hardening
   (`etc/sysctl.d/99-hardening.conf`), SSH server/client hardening
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`), the `wol` helper
   (`usr/bin/wol`).
-- **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
-  enabled everywhere; `systemd-resolved` masked on clamps so Pi-hole owns port 53.
+- **Unit state** (`systemd` module): `podman-auto-update.timer` enabled
+  everywhere; `systemd-resolved` masked on clamps so Pi-hole owns port 53.
 
 ### What does NOT live here
 
@@ -46,10 +48,10 @@ also manages (sysctl, sshd) simply become no-ops there.
    repository secret named `SIGNING_SECRET`. Never commit the private key
    (`.gitignore` already excludes it).
 
-3. **First build ordering.** The per-host images use `ucore-common` as their
-   base, so `ucore-common` must be published first. On the very first push the
-   dependent builds will fail; once `ucore-common:latest` exists, re-run the
-   workflow (**Actions → bluebuild → Run workflow**) and they will succeed.
+3. **Build ordering.** The per-host images use `ucore-common` as their base
+   (`FROM ghcr.io/gbagnoli/ucore-common:latest`). The workflow builds in two
+   serialized jobs — `build-common` first, then `build-hosts` (`needs:`) — so
+   dependents always build on the common image published by the same run.
    Daily scheduled builds keep everything fresh afterwards.
 
 ## Rebasing a host
