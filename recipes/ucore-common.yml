@@ -16,9 +16,16 @@ modules:
       - source: system
         destination: / # copies files/system/* into the image's root folder /
 
+  - type: dnf
+    install:
+      packages:
+        - wol # Wake-on-LAN magic packet sender (replaces our old wrapper script)
+        - et # EternalTerminal server (remote shell with session persistence)
+
   - type: systemd
     system:
       enabled:
+        - et.service
         - podman-auto-update.timer
 
   - type: signing # sets up the cosign policy & signing files for signed images
