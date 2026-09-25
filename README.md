@@ -21,7 +21,7 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 - **Static files** (`files/system/` → `/`): sysctl hardening
   (`etc/sysctl.d/99-hardening.conf`), SSH server/client hardening
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`), the `wol` helper
-  (`usr/local/bin/wol`).
+  (`usr/bin/wol`).
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
   enabled everywhere; `systemd-resolved` masked on clamps so Pi-hole owns port 53.
 
