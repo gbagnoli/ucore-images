@@ -15,8 +15,32 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
-  bluebuild:
-    name: Build Custom Image
+  # Build the shared base first: the per-host images use
+  # ghcr.io/gbagnoli/ucore-common:latest as their FROM, so they must run
+  # after it is built and pushed in the same workflow run.
+  build-common:
+    name: Build ucore-common
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      # the build is fully handled by the reusable github action
+      - name: Build Custom Image
+        uses: blue-build/github-action@v1.13
+        with:
+          recipe: ucore-common.yml
+          cosign_private_key: ${{ secrets.SIGNING_SECRET }}
+          registry_token: ${{ github.token }}
+          pr_event_number: ${{ github.event.number }}
+
+          # enabled by default, disable if your image is small and you want faster builds
+          maximize_build_space: true
+
+  build-hosts:
+    name: Build ${{ matrix.recipe }}
+    needs: build-common
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,7 +50,6 @@ jobs:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
         recipe:
-          - ucore-common.yml
           - ucore-beelzebot.yml
           - ucore-clamps.yml
           - ucore-bender.yml
