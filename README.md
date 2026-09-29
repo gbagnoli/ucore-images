@@ -18,12 +18,15 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 
 - **Packages** (`dnf` module in `ucore-common`): `wol` (Wake-on-LAN sender —
   the old wrapper script is gone, the distro tool replaces it), `et`
-  (EternalTerminal server; package name is `et` in Fedora).
+  (EternalTerminal server; package name is `et` in Fedora), and `btrbk`
+  (Btrfs snapshot tool, configured only by hosts that opt in through Skillet).
 - **Static files** (`files/system/` → `/`): sysctl hardening
   (`etc/sysctl.d/99-hardening.conf`), SSH server/client hardening
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`).
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
-  enabled everywhere; `systemd-resolved` masked on clamps so Pi-hole owns port 53.
+  enabled everywhere; the package's daily `btrbk.timer` is masked so opted-in
+  hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps
+  so Pi-hole owns port 53.
 
 ### What does NOT live here
 
