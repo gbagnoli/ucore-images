@@ -21,6 +21,8 @@ modules:
       packages:
         - wol # Wake-on-LAN magic packet sender (replaces our old wrapper script)
         - et # EternalTerminal server (remote shell with session persistence)
+        - postfix # Native fleet submission relay; Skillet supplies runtime configuration
+        - cyrus-sasl-plain # SMTP PLAIN/LOGIN authentication over verified STARTTLS
         - btrbk # Btrfs snapshot and backup management for opted-in hosts
 
   - type: systemd
@@ -28,6 +30,8 @@ modules:
       enabled:
         - et.service
         - podman-auto-update.timer
+      disabled:
+        - postfix.service # Activate only after encrypted relay configuration is delivered
       masked:
         - btrbk.timer # Skillet opts in with its guarded hourly timer per host
 

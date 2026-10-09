@@ -1,0 +1,2 @@
+# Skillet activates the relay after credential delivery.
+disable postfix.service
