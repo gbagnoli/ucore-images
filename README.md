@@ -8,9 +8,9 @@ images. One repo, one CI pipeline, one shared base — thin per-host images on t
 | Image | Base | For |
 |---|---|---|
 | `ucore-common` | `ghcr.io/ublue-os/ucore:stable` | Shared fleet base: extra packages, hardening files, common unit state |
-| `ucore-beelzebot` | `ghcr.io/gbagnoli/ucore-common:latest` | beelzebot (was: boxy) |
+| `ucore-joey` | `ghcr.io/gbagnoli/ucore-common:latest` | joey (was: boxy) |
 | `ucore-clamps` | `ghcr.io/gbagnoli/ucore-common:latest` | clamps, the home server (Beelink Mini S13) |
-| `ucore-bender` | `ghcr.io/gbagnoli/ucore-common:latest` | bender (future host; was: calculon) |
+| `ucore-donbot` | `ghcr.io/gbagnoli/ucore-common:latest` | donbot (future host; was: calculon) |
 
 All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 
@@ -26,7 +26,7 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`).
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
   enabled everywhere; the package's daily `btrbk.timer` is masked so opted-in
-  hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and beelzebot
+  hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and joey
   so Pi-hole owns port 53. `postfix.service` is disabled until Skillet delivers
   and applies encrypted SMTP configuration; a preset preserves that default.
 

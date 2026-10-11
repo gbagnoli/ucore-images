@@ -1,8 +1,8 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
-# image will be published to ghcr.io/gbagnoli/ucore-beelzebot
-name: ucore-beelzebot
-description: uCore for beelzebot (formerly boxy).
+# image will be published to ghcr.io/gbagnoli/ucore-joey
+name: ucore-joey
+description: uCore for joey (formerly boxy).
 
 # thin per-host layer on top of the shared fleet base
 base-image: ghcr.io/gbagnoli/ucore-common

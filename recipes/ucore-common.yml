@@ -3,7 +3,7 @@
 # image will be published to ghcr.io/gbagnoli/ucore-common
 name: ucore-common
 # description will be included in the image's metadata
-description: Shared uCore base for the home fleet (beelzebot, bender, clamps).
+description: Shared uCore base for the home fleet (joey, donbot, clamps).
 
 # the base image to build on top of (FROM) and the version tag to use
 base-image: ghcr.io/ublue-os/ucore
