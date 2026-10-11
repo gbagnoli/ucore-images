@@ -26,7 +26,7 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`).
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
   enabled everywhere; the package's daily `btrbk.timer` is masked so opted-in
-  hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps
+  hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and beelzebot
   so Pi-hole owns port 53. `postfix.service` is disabled until Skillet delivers
   and applies encrypted SMTP configuration; a preset preserves that default.
 

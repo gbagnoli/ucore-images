@@ -9,5 +9,10 @@ base-image: ghcr.io/gbagnoli/ucore-common
 image-version: latest
 
 modules:
-  # No host-specific OS bits yet; per-host config lives in skillet.
+  # Pi-hole owns host port 53, matching the selected Skillet host profile.
+  - type: systemd
+    system:
+      masked:
+        - systemd-resolved.service
+
   - type: signing
