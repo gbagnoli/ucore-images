@@ -20,6 +20,7 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   the old wrapper script is gone, the distro tool replaces it), `et`
   (EternalTerminal server; package name is `et` in Fedora), and `btrbk`
   (Btrfs snapshot tool, configured only by hosts that opt in through Skillet),
+  `nut` and `nut-client` (native UPS protection for opted-in hosts),
   `postfix` (native SMTP relay), and `cyrus-sasl-plain` (SMTP authentication).
 - **Static files** (`files/system/` → `/`): sysctl hardening
   (`etc/sysctl.d/99-hardening.conf`), SSH server/client hardening
@@ -29,6 +30,8 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and joey
   so Pi-hole owns port 53. `postfix.service` is disabled until Skillet delivers
   and applies encrypted SMTP configuration; a preset preserves that default.
+  NUT services and driver enumeration are disabled by default. Skillet owns
+  `/etc/ups`, per-host USB selection, loopback listeners and activation.
 
 ### What does NOT live here
 

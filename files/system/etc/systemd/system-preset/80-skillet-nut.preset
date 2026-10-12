@@ -1,0 +1,3 @@
+# UPS protection is activated only by an explicit Skillet host declaration.
+disable nut-*
+disable nut.target

@@ -23,6 +23,8 @@ modules:
         - et # EternalTerminal server (remote shell with session persistence)
         - postfix # Native fleet submission relay; Skillet supplies runtime configuration
         - cyrus-sasl-plain # SMTP PLAIN/LOGIN authentication over verified STARTTLS
+        - nut # Native USB UPS driver/server; Skillet opts in per host
+        - nut-client # Local UPS monitor and shutdown integration
         - btrbk # Btrfs snapshot and backup management for opted-in hosts
 
   - type: systemd
@@ -31,6 +33,15 @@ modules:
         - et.service
         - podman-auto-update.timer
       disabled:
+        - nut.target
+        - nut-driver.target
+        - nut-server.service
+        - nut-monitor.service
+        - nut-driver-enumerator.service
+        - nut-driver-enumerator.path
+        - nut-driver-enumerator-daemon.service
+        - nut-driver-enumerator-daemon-activator.service
+        - nut-driver-enumerator-daemon-activator.path
         - postfix.service # Activate only after encrypted relay configuration is delivered
       masked:
         - btrbk.timer # Skillet opts in with its guarded hourly timer per host
