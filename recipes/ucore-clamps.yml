@@ -9,9 +9,16 @@ base-image: ghcr.io/gbagnoli/ucore-common
 image-version: latest
 
 modules:
+  - type: dnf
+    install:
+      packages:
+        - bluez # Host Bluetooth daemon for the selected Home Assistant adapter
+
   # Pi-hole needs port 53; make sure nothing on this host fights it for the DNS port.
   - type: systemd
     system:
+      enabled:
+        - bluetooth.service
       masked:
         - systemd-resolved.service
 
