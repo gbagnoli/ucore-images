@@ -33,10 +33,15 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   NUT services and driver enumeration are disabled by default. Skillet owns
   `/etc/ups`, per-host USB selection, loopback listeners and activation.
 
-Donbot additionally ships `gpth` (Google Photos Takeout Helper), `rsync`, `tar`
-and GNU Parallel. The x86_64 upstream `gpth` release and SHA-256 are pinned in
+Donbot additionally ships `gpth` (Google Photos Takeout Helper), `rclone`, `jq`,
+GNU Parallel, `rsync`, `tar`, `gzip`, `findutils`, `grep`, `file` and `wget` for
+Takeout download/processing scripts. Bash and coreutils come from the base.
+The x86_64 upstream `gpth` release and SHA-256 are pinned in
 `files/scripts/install-gpth.sh`; update both together. Run `gpth --help` as the
 ordinary user to process a Takeout export. No automatic photo processing occurs.
+Scripts using a bundled `bin/gpth` continue to use that copy; select `/usr/bin/gpth`
+or invoke `gpth` through PATH to use the image version. Configure rclone remotes
+and credentials separately as the login user.
 
 ### What does NOT live here
 

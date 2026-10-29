@@ -12,9 +12,16 @@ modules:
   - type: dnf
     install:
       packages:
+        - file
+        - findutils
+        - grep
+        - gzip
+        - jq
+        - parallel
+        - rclone
         - rsync
         - tar
-        - parallel
+        - wget
 
   - type: script
     scripts:
