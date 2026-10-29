@@ -9,5 +9,15 @@ base-image: ghcr.io/gbagnoli/ucore-common
 image-version: latest
 
 modules:
-  # No host-specific OS bits yet; per-host config lives in skillet.
+  - type: dnf
+    install:
+      packages:
+        - rsync
+        - tar
+        - parallel
+
+  - type: script
+    scripts:
+      - install-gpth.sh
+
   - type: signing
