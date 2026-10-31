@@ -13,6 +13,7 @@ modules:
     install:
       packages:
         - bluez # Host Bluetooth daemon for the selected Home Assistant adapter
+        - xdg-dbus-proxy # BlueZ-only bus access for Home Assistant
 
   # Pi-hole needs port 53; make sure nothing on this host fights it for the DNS port.
   - type: systemd
