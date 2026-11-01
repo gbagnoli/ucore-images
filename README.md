@@ -18,7 +18,8 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 
 - **Packages** (`dnf` module in `ucore-common`): `wol` (Wake-on-LAN sender —
   the old wrapper script is gone, the distro tool replaces it), `et`
-  (EternalTerminal server; package name is `et` in Fedora), and `btrbk`
+  (EternalTerminal server; package name is `et` in Fedora), `glibc-langpack-en`
+  (English UTF-8 login/SSH locales), and `btrbk`
   (Btrfs snapshot tool, configured only by hosts that opt in through Skillet),
   `nut` and `nut-client` (native UPS protection for opted-in hosts),
   `postfix` (native SMTP relay), and `cyrus-sasl-plain` (SMTP authentication).

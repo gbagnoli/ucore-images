@@ -21,6 +21,7 @@ modules:
       packages:
         - wol # Wake-on-LAN magic packet sender (replaces our old wrapper script)
         - et # EternalTerminal server (remote shell with session persistence)
+        - glibc-langpack-en # English UTF-8 locales used by SSH clients and login shells
         - postfix # Native fleet submission relay; Skillet supplies runtime configuration
         - cyrus-sasl-plain # SMTP PLAIN/LOGIN authentication over verified STARTTLS
         - nut # Native USB UPS driver/server; Skillet opts in per host
