@@ -27,7 +27,11 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
   (`etc/sysctl.d/99-hardening.conf`), SSH server/client hardening
   (`etc/ssh/sshd_config`, `etc/ssh/ssh_config`).
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
-  enabled everywhere; the package's daily `btrbk.timer` is masked so opted-in
+  enabled everywhere. An ET drop-in persists and activates TCP 2022 grants only
+  for the standard Tailscale IPv4/IPv6 source ranges in the default firewall zone,
+  without a firewall reload; SSH authentication remains required. Existing grants
+  are retained if policy changes, so remove obsolete grants explicitly. The
+  package's daily `btrbk.timer` is masked so opted-in
   hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and joey
   so Pi-hole owns port 53. `postfix.service` is disabled until Skillet delivers
   and applies encrypted SMTP configuration; a preset preserves that default.
