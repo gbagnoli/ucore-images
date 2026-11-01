@@ -29,7 +29,10 @@ All images are published to `ghcr.io/gbagnoli/<name>` and signed with cosign.
 - **Unit state** (`systemd` module): `et.service` and `podman-auto-update.timer`
   enabled everywhere. An ET drop-in persists and activates TCP 2022 grants only
   for the standard Tailscale IPv4/IPv6 source ranges in the default firewall zone,
-  without a firewall reload; SSH authentication remains required. Existing grants
+  without a firewall reload; Skillet additionally derives ET LAN grants from
+  active hardware NIC addresses/netmasks. SSH TCP 22 retains the base zone's
+  source-unrestricted allowance independently of Tailscale, and ET still requires
+  SSH authentication. Existing grants
   are retained if policy changes, so remove obsolete grants explicitly. The
   package's daily `btrbk.timer` is masked so opted-in
   hosts use Skillet's guarded hourly timer; `systemd-resolved` masked on clamps and joey
