@@ -9,6 +9,11 @@ base-image: ghcr.io/gbagnoli/ucore-common
 image-version: latest
 
 modules:
+  - type: files
+    files:
+      - source: skillet-donbot
+        destination: /
+
   - type: dnf
     install:
       packages:

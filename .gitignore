@@ -3,3 +3,6 @@ cosign.private
 /Containerfile
 *.iso
 *.iso-CHECKSUM
+
+# Generated exact-revision Skillet image trees
+/files/skillet-*

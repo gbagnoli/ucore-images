@@ -38,9 +38,77 @@ jobs:
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
 
+  build-skillet:
+    name: Build pinned Skillet bundles
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CARGO_TARGET_DIR: ${{ runner.temp }}/skillet-target
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read exact source pin
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision=$(cat skillet-source.txt)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: gbagnoli/devmachine
+          ref: ${{ steps.source.outputs.revision }}
+          path: source
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install CI musl linker
+        run: sudo apt-get update && sudo apt-get install --yes musl-tools
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: source/ublue/skillet -> ${{ runner.temp }}/skillet-target
+      - name: Build matching binaries
+        working-directory: source/ublue/skillet
+        env:
+          SKILLET_REVISION: ${{ steps.source.outputs.revision }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SKILLET_REVISION"
+          test -z "$(git status --porcelain)"
+          cargo build --locked --release --target x86_64-unknown-linux-musl \
+            -p skillet -p skillet-clamps -p skillet-joey -p skillet-donbot
+      - name: Render and archive public bundles
+        working-directory: source/ublue/skillet
+        env:
+          SKILLET_REVISION: ${{ steps.source.outputs.revision }}
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
+          install -d -m 0755 "$RUNNER_TEMP/skillet-bundles"
+          binary_dir="$CARGO_TARGET_DIR/x86_64-unknown-linux-musl/release"
+          for host in clamps joey donbot; do
+            tree="$RUNNER_TEMP/skillet-tree-$host"
+            "$binary_dir/skillet" image "$host" \
+              --source-revision "$SKILLET_REVISION" \
+              --generic-binary "$binary_dir/skillet" \
+              --host-binary "$binary_dir/skillet-$host" --output "$tree"
+            tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
+              -czf "$RUNNER_TEMP/skillet-bundles/$host.tar.gz" -C "$tree" usr
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skillet-bundles
+          path: ${{ runner.temp }}/skillet-bundles/*.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+
   build-hosts:
-    name: Build ${{ matrix.recipe }}
-    needs: build-common
+    name: Build ucore-${{ matrix.host }}
+    needs: [build-common, build-skillet]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,16 +117,33 @@ jobs:
     strategy:
       fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
-        recipe:
-          - ucore-joey.yml
-          - ucore-clamps.yml
-          - ucore-donbot.yml
+        host: [joey, clamps, donbot]
     steps:
-      # the build is fully handled by the reusable github action
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: skillet-bundles
+          path: ${{ runner.temp }}/skillet-bundles
+      - name: Verify selected image bundle
+        env:
+          SKILLET_HOST: ${{ matrix.host }}
+        run: |
+          set -euo pipefail
+          revision=$(cat skillet-source.txt)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          tree="$PWD/files/skillet-$SKILLET_HOST"
+          install -d -m 0755 "$tree"
+          tar --same-permissions --no-same-owner -xzf "$RUNNER_TEMP/skillet-bundles/$SKILLET_HOST.tar.gz" -C "$tree"
+          "$tree/usr/bin/skillet" image "$SKILLET_HOST" \
+            --source-revision "$revision" --generic-binary "$tree/usr/bin/skillet" \
+            --host-binary "$tree/usr/bin/skillet-$SKILLET_HOST" --output "$tree"
       - name: Build Custom Image
         uses: blue-build/github-action@v1.13
         with:
-          recipe: ${{ matrix.recipe }}
+          recipe: ucore-${{ matrix.host }}.yml
+          skip_checkout: true
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}

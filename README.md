@@ -59,6 +59,28 @@ DNS records), quadlets/containers, and config that changes often (nginx vhosts,
 btrbk config). Skillet is idempotent, so files baked into the image that it
 also manages (sysctl, sshd) simply become no-ops there.
 
+## Pinned Skillet artifacts
+
+`skillet-source.txt` is the full public `gbagnoli/devmachine` commit consumed by
+CI. Update it only to a reviewed commit containing the image bundle exporter;
+push that source commit to devmachine before pushing this repository. CI builds
+matching clean static binaries, renders public per-host trees, preserves their
+modes in tar archives, and verifies each bundle before building its host image.
+Generated `files/skillet-<host>` trees are ignored and must not be committed.
+
+Host images receive `/usr/bin/skillet`, `/usr/bin/skillet-<host>` and
+`/usr/share/skillet/release.json`. Inspect those paths explicitly after image
+build/boot. Existing `/var/usrlocal/bin` delivery and boot-unit references retain
+operational precedence. No service ownership or private configuration is switched
+by this artifact-only layer.
+
+For local host image builds, first generate the matching `files/skillet-<host>`
+tree using the pinned source's
+[image bundle guide](https://github.com/gbagnoli/devmachine/blob/skillet/ublue/skillet/crates/workstation/docs/image-bundles.md),
+then run `bluebuild build recipes/ucore-<host>.yml`. Common image builds need no
+Skillet bundle. Missing host bundles intentionally fail rather than silently
+building an image without its declared artifacts.
+
 ## Setup
 
 1. **Create the GitHub repo** (e.g. `gbagnoli/ucore-images`) and push this.
@@ -73,8 +95,8 @@ also manages (sysctl, sshd) simply become no-ops there.
    (`.gitignore` already excludes it).
 
 3. **Build ordering.** The per-host images use `ucore-common` as their base
-   (`FROM ghcr.io/gbagnoli/ucore-common:latest`). The workflow builds in two
-   serialized jobs — `build-common` first, then `build-hosts` (`needs:`) — so
+   (`FROM ghcr.io/gbagnoli/ucore-common:latest`). `build-common` and the pinned
+   Skillet artifact build may run concurrently; `build-hosts` waits for both, so
    dependents always build on the common image published by the same run.
    Daily scheduled builds keep everything fresh afterwards.
 
