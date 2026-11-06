@@ -46,7 +46,7 @@ jobs:
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/source/ublue/skillet/target
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Read exact source pin
@@ -57,7 +57,7 @@ jobs:
           revision=$(cat skillet-source.txt)
           [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
           echo "revision=$revision" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: gbagnoli/devmachine
           ref: ${{ steps.source.outputs.revision }}
@@ -119,7 +119,7 @@ jobs:
       matrix:
         host: [joey, clamps, donbot]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v4
