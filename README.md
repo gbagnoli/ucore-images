@@ -55,8 +55,7 @@ and credentials separately as the login user.
 
 Everything with a secret, a hostname, or a fast iteration loop stays in
 **skillet**: credentials → podman secrets, per-host values (LAN IPs, domains,
-DNS records), quadlets/containers, and config that changes often (nginx vhosts,
-btrbk config). Skillet is idempotent, so files baked into the image that it
+DNS records), quadlets/containers, and private service configuration (Caddy routes, DNS records). Skillet is idempotent, so files baked into the image that it
 also manages (sysctl, sshd) simply become no-ops there.
 
 ## Pinned Skillet artifacts
@@ -68,15 +67,19 @@ matching clean static binaries, renders public per-host trees, preserves their
 modes in tar archives, and verifies each bundle before building its host image.
 Generated `files/skillet-<host>` trees are ignored and must not be committed.
 
-Host images receive `/usr/bin/skillet`, `/usr/bin/skillet-<host>` and
-`/usr/share/skillet/release.json`. Inspect those paths explicitly after image
-build/boot. Existing `/var/usrlocal/bin` delivery and boot-unit references retain
-operational precedence. No service ownership or private configuration is switched
-by this artifact-only layer.
+Host images receive `/usr/bin/skillet`, `/usr/bin/skillet-<host>`, caller-selected
+btrbk config/ownership marker under `/usr/share/skillet/btrbk`, and vendor
+`skillet-btrbk.service`/`.timer` under `/usr/lib/systemd/system`.
+`/usr/share/skillet/release.json` records all artifact hashes and modes. General
+`/var/usrlocal/bin` delivery and boot-unit references retain operational ownership.
+The btrbk module explicitly retires verified legacy overrides and repoints timer
+enablement; retain the migration-capable mutable caller for rollback reconciliation.
+See the [migration guide](https://github.com/gbagnoli/devmachine/blob/master/ublue/skillet/crates/btrbk/README.md).
+Private inputs remain runtime-owned.
 
 For local host image builds, first generate the matching `files/skillet-<host>`
 tree using the pinned source's
-[image bundle guide](https://github.com/gbagnoli/devmachine/blob/skillet/ublue/skillet/crates/workstation/docs/image-bundles.md),
+[image bundle guide](https://github.com/gbagnoli/devmachine/blob/master/ublue/skillet/crates/workstation/docs/image-bundles.md),
 then run `bluebuild build recipes/ucore-<host>.yml`. Common image builds need no
 Skillet bundle. Missing host bundles intentionally fail rather than silently
 building an image without its declared artifacts.
