@@ -44,7 +44,7 @@ jobs:
     permissions:
       contents: read
     env:
-      CARGO_TARGET_DIR: ${{ runner.temp }}/skillet-target
+      CARGO_TARGET_DIR: ${{ github.workspace }}/source/ublue/skillet/target
     steps:
       - uses: actions/checkout@v4
         with:
@@ -70,7 +70,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install --yes musl-tools
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: source/ublue/skillet -> ${{ runner.temp }}/skillet-target
+          workspaces: source/ublue/skillet -> target
       - name: Build matching binaries
         working-directory: source/ublue/skillet
         env:
