@@ -43,26 +43,54 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      revision: ${{ steps.source.outputs.revision }}
+      version: ${{ steps.source.outputs.version }}
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/source/ublue/skillet/target
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Read exact source pin
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Read release dependency
         id: source
         shell: bash
         run: |
-          set -euo pipefail
-          revision=$(cat skillet-source.txt)
-          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
-          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          python3 - <<'PYTHON'
+          import json
+          import os
+          import re
+          from pathlib import Path
+          # Bootstrap extraction only; the source validator checks the complete contract.
+          data = json.loads(Path("skillet-release.json").read_text())
+          revision, version = data["commit"], data["version"]
+          if not isinstance(revision, str) or not re.fullmatch(r"[0-9a-f]{40}", revision):
+              raise SystemExit("Invalid release commit")
+          if not isinstance(version, str) or not re.fullmatch(r"[0-9A-Za-z.-]+", version):
+              raise SystemExit("Invalid release version")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"revision={revision}\nversion={version}\n")
+          PYTHON
       - uses: actions/checkout@v4
         with:
           repository: gbagnoli/devmachine
           ref: ${{ steps.source.outputs.revision }}
+          fetch-depth: 0
           path: source
           persist-credentials: false
+      - name: Verify published release, tag, source commit and workspace version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SKILLET_VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh api "repos/gbagnoli/devmachine/releases/tags/skillet-v$SKILLET_VERSION" > "$RUNNER_TEMP/skillet-publication.json"
+          python3 source/ublue/skillet/tools/release.py --tag "skillet-v$SKILLET_VERSION" \
+            --lock-file "$GITHUB_WORKSPACE/skillet-release.json" \
+            --release-json "$RUNNER_TEMP/skillet-publication.json"
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-musl
@@ -85,9 +113,13 @@ jobs:
         working-directory: source/ublue/skillet
         env:
           SKILLET_REVISION: ${{ steps.source.outputs.revision }}
+          SKILLET_VERSION: ${{ steps.source.outputs.version }}
         run: |
           set -euo pipefail
           test -z "$(git status --porcelain)"
+          python3 tools/release.py --tag "skillet-v$SKILLET_VERSION" \
+            --lock-file "$GITHUB_WORKSPACE/skillet-release.json" \
+            --binary-dir "$CARGO_TARGET_DIR/x86_64-unknown-linux-musl/release"
           install -d -m 0755 "$RUNNER_TEMP/skillet-bundles"
           binary_dir="$CARGO_TARGET_DIR/x86_64-unknown-linux-musl/release"
           for host in clamps joey donbot; do
@@ -129,13 +161,15 @@ jobs:
       - name: Verify selected image bundle
         env:
           SKILLET_HOST: ${{ matrix.host }}
+          SKILLET_REVISION: ${{ needs.build-skillet.outputs.revision }}
+          SKILLET_VERSION: ${{ needs.build-skillet.outputs.version }}
         run: |
           set -euo pipefail
-          revision=$(cat skillet-source.txt)
-          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          revision="$SKILLET_REVISION"
           tree="$PWD/files/skillet-$SKILLET_HOST"
           install -d -m 0755 "$tree"
           tar --same-permissions --no-same-owner -xzf "$RUNNER_TEMP/skillet-bundles/$SKILLET_HOST.tar.gz" -C "$tree"
+          test "$("$tree/usr/bin/skillet" --version)" = "skillet $SKILLET_VERSION+git.${revision:0:12}"
           "$tree/usr/bin/skillet" image "$SKILLET_HOST" \
             --source-revision "$revision" --generic-binary "$tree/usr/bin/skillet" \
             --host-binary "$tree/usr/bin/skillet-$SKILLET_HOST" --output "$tree"

@@ -60,11 +60,14 @@ also manages (sysctl, sshd) simply become no-ops there.
 
 ## Pinned Skillet artifacts
 
-`skillet-source.txt` is the full public `gbagnoli/devmachine` commit consumed by
-CI. Update it only to a reviewed commit containing the image bundle exporter;
-push that source commit to devmachine before pushing this repository. CI builds
-matching clean static binaries, renders public per-host trees, preserves their
-modes in tar archives, and verifies each bundle before building its host image.
+`skillet-release.json` locks a Skillet semantic version and full source commit.
+Select a published annotated `skillet-v<version>` release. CI requires matching
+publication, tag, Cargo version and commit, then builds from that exact commit.
+Do not move/reuse published tags or select a moving version range. Follow the
+[source release guide](https://github.com/gbagnoli/devmachine/blob/master/ublue/skillet/crates/workstation/docs/releases.md)
+to generate the lock; publish the devmachine release before pushing this repository.
+CI builds matching clean static binaries, renders public per-host trees, preserves
+their modes in tar archives, and verifies each bundle before building its host image.
 Generated `files/skillet-<host>` trees are ignored and must not be committed.
 
 Host images receive `/usr/bin/skillet`, `/usr/bin/skillet-<host>`, caller-selected
@@ -78,7 +81,7 @@ See the [migration guide](https://github.com/gbagnoli/devmachine/blob/master/ubl
 Private inputs remain runtime-owned.
 
 For local host image builds, first generate the matching `files/skillet-<host>`
-tree using the pinned source's
+tree using the locked release's
 [image bundle guide](https://github.com/gbagnoli/devmachine/blob/master/ublue/skillet/crates/workstation/docs/image-bundles.md),
 then run `bluebuild build recipes/ucore-<host>.yml`. Common image builds need no
 Skillet bundle. Missing host bundles intentionally fail rather than silently
