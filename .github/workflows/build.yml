@@ -87,7 +87,10 @@ jobs:
           SKILLET_VERSION: ${{ steps.source.outputs.version }}
         run: |
           set -euo pipefail
-          gh api "repos/gbagnoli/devmachine/releases/tags/skillet-v$SKILLET_VERSION" > "$RUNNER_TEMP/skillet-publication.json"
+          if ! gh api "repos/gbagnoli/devmachine/releases/tags/skillet-v$SKILLET_VERSION" > "$RUNNER_TEMP/skillet-publication.json"; then
+            echo "::error::Cannot read published devmachine release skillet-v$SKILLET_VERSION. Publish that source release before building images; a Git tag alone is insufficient. Also check GitHub API access if the release exists."
+            exit 1
+          fi
           python3 source/ublue/skillet/tools/release.py --tag "skillet-v$SKILLET_VERSION" \
             --lock-file "$GITHUB_WORKSPACE/skillet-release.json" \
             --release-json "$RUNNER_TEMP/skillet-publication.json"
