@@ -49,7 +49,7 @@ jobs:
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/source/ublue/skillet/target
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
@@ -74,7 +74,7 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
               output.write(f"revision={revision}\nversion={version}\n")
           PYTHON
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: gbagnoli/devmachine
           ref: ${{ steps.source.outputs.revision }}
@@ -134,7 +134,7 @@ jobs:
             tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner \
               -czf "$RUNNER_TEMP/skillet-bundles/$host.tar.gz" -C "$tree" usr
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: skillet-bundles
           path: ${{ runner.temp }}/skillet-bundles/*.tar.gz
@@ -154,10 +154,10 @@ jobs:
       matrix:
         host: [joey, clamps, donbot]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: skillet-bundles
           path: ${{ runner.temp }}/skillet-bundles
