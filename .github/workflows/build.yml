@@ -15,9 +15,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 jobs:
-  # Build the shared base first: the per-host images use
-  # ghcr.io/gbagnoli/ucore-common:latest as their FROM, so they must run
-  # after it is built and pushed in the same workflow run.
+  # Build the shared base first: on main/scheduled builds the per-host images
+  # use ghcr.io/gbagnoli/ucore-common:latest, so it must be pushed first in
+  # that workflow run. Pull-request builds validate without publishing; their
+  # host recipes use the latest published common image.
   build-common:
     name: Build ucore-common
     runs-on: ubuntu-latest
@@ -34,6 +35,7 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
@@ -184,6 +186,7 @@ jobs:
           cosign_private_key: ${{ secrets.SIGNING_SECRET }}
           registry_token: ${{ github.token }}
           pr_event_number: ${{ github.event.number }}
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
 
           # enabled by default, disable if your image is small and you want faster builds
           maximize_build_space: true
