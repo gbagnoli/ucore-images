@@ -24,6 +24,8 @@ modules:
         - glibc-langpack-en # English UTF-8 locales used by SSH clients and login shells
         - postfix # Native fleet submission relay; Skillet supplies runtime configuration
         - cyrus-sasl-plain # SMTP PLAIN/LOGIN authentication over verified STARTTLS
+        # Earlier Fedora 45 builds corrupt PCR-bound unseal responses (upstream #46).
+        - "clevis-pin-tpm2 >= 0.5.5-2"
         - nut # Native USB UPS driver/server; Skillet opts in per host
         - nut-client # Local UPS monitor and shutdown integration
         - btrbk # Btrfs snapshot and backup management for opted-in hosts
@@ -46,5 +48,8 @@ modules:
         - postfix.service # Activate only after encrypted relay configuration is delivered
       masked:
         - btrbk.timer # Skillet opts in with its guarded hourly timer per host
+
+  # Updating /usr alone leaves the old decryptor in the shipped early-boot image.
+  - type: initramfs
 
   - type: signing # sets up the cosign policy & signing files for signed images

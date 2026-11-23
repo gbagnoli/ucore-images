@@ -11,3 +11,6 @@
   Require publication of the reviewed source release before building or publishing
   dependent images; cross-repository changes may be prepared locally. Never replace
   exact commits with moving refs or remove publication/binary identity checks.
+- Changes to early-boot dependencies must reach the shipped initramfs, not just
+  the installed root filesystem. Regenerate it during image construction and
+  verify encrypted-root boot separately from userspace/package tests.
