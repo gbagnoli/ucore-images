@@ -1,0 +1,11 @@
+[Unit]
+Description=Reboot after the trial deployment failed to unlock root
+DefaultDependencies=no
+ConditionPathExists=/etc/initrd-release
+ConditionKernelCommandLine=skillet.boot-trial=1
+Conflicts=initrd-switch-root.target shutdown.target
+Before=initrd-switch-root.target shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl --no-block reboot

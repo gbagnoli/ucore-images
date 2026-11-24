@@ -1,0 +1,12 @@
+[Unit]
+Description=Deadline for unlocking the trial deployment
+DefaultDependencies=no
+ConditionPathExists=/etc/initrd-release
+ConditionKernelCommandLine=skillet.boot-trial=1
+Conflicts=initrd-switch-root.target shutdown.target
+Before=initrd-switch-root.target shutdown.target
+
+[Timer]
+OnBootSec=3min
+AccuracySec=1s
+Unit=skillet-boot-trial-expired.service
